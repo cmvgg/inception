@@ -1,0 +1,30 @@
+FROM debian:bullseye
+
+RUN	apt-get -y update \
+	&& apt-get -y upgrade
+
+RUN	apt-get -y install openssl \
+	python3 \
+	certbot python3-certbot-nginx \
+	build-essential \
+	libpcre3 libpcre3-dev \
+	zlib1g zlib1g-dev \
+	libssl-dev \
+	mariadb-server \
+	php-fpm \
+	nginx-extras
+
+RUN	mkdir -p /etc/nginx/ssl
+
+RUN	openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+	-out /etc/nginx/ssl/cvarela-.crt \
+	-keyout /etc/nginx/ssl/cvarela-.key \
+	-subj "/C=ES/ST=Bizkaia/L=Urduliz/O=42 School/OU=cvarela-/CN=cvarela-/"
+
+COPY	./conf/nginx.conf /etc/nginx/conf.d
+
+RUN	mkdir -p /run/nginx
+
+EXPOSE	443
+
+CMD ["nginx", "-g", "daemon off;"]
